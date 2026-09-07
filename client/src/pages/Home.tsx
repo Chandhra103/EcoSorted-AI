@@ -288,19 +288,19 @@ export default function Home() {
               <label className={`image-dropzone ${imageScanning ? "is-scanning" : ""}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); handleImage(event.dataTransfer.files[0]); }}>
                 <input type="file" accept="image/*" capture="environment" onChange={(event) => handleImage(event.target.files?.[0])} />
                 {imagePreview ? <img src={imagePreview} alt="Selected waste item preview" /> : <span className="image-drop-icon"><Camera size={21} /></span>}
-                <span><strong>{imageScanning ? "Scanning visual clues…" : imageName || "Upload image / take photo"}</strong><small>{imageScanning ? "Matching object hints to the rules library" : "Drag & drop or tap to scan an item"}</small></span>
+                <span><strong>{imageScanning ? "Scanning visual clues…" : imageName || "Upload Photo / Take Photo"}</strong><small>{imageScanning ? "Matching object hints to the rules library" : "Drag & drop or tap to scan an item"}</small></span>
                 <Upload size={16} className="image-upload-arrow" />
               </label>
             </div>
             <div className="input-divider"><span>or choose without typing</span></div>
             <div className="quick-inputs">
-              <button className="wizard-launch" onClick={() => setWizardOpen(true)}><CircleHelp size={17} /><span><strong>Help me identify</strong><small>2-question guided wizard</small></span><ArrowRight size={16} /></button>
+              <button className="wizard-launch" onClick={() => setWizardOpen(true)}><CircleHelp size={17} /><span><strong>Help Me Identify</strong><small>2-question guided wizard</small></span><ArrowRight size={16} /></button>
               <div className="quick-chip-list">{[
-                { label: "Greasy pizza box", query: "greasy pizza box", icon: FileText },
-                { label: "Old battery", query: "broken lithium battery", icon: BatteryWarning },
-                { label: "Broken phone", query: "old smartphone", icon: Cpu },
-                { label: "Food scraps", query: "food scraps", icon: Leaf },
-                { label: "Plastic bottle", query: "plastic bottle", icon: Droplets },
+                { label: "Greasy Pizza Box", query: "greasy pizza box", icon: FileText },
+                { label: "Old Battery / Cell", query: "broken lithium battery", icon: BatteryWarning },
+                { label: "Broken Phone / Charging Cable", query: "old smartphone", icon: Cpu },
+                { label: "Food Scraps / Organic", query: "food scraps", icon: Leaf },
+                { label: "Plastic Bottle", query: "plastic bottle", icon: Droplets },
               ].map((chip) => { const Icon = chip.icon; return <button className="quick-chip" key={chip.label} onClick={() => submitQuery(chip.query)}><Icon size={15} /><span>{chip.label}</span></button>; })}</div>
             </div>
           </div>
@@ -339,7 +339,7 @@ export default function Home() {
             <div className="ethics-list">
               <div className="ethics-item"><div className="ethics-number">01</div><div className="ethics-icon"><ShieldCheck size={21} /></div><div><h3>Safety & guardrails</h3><p>Hazardous items are flagged clearly with handling advice — because a wrong bin can be a real risk.</p></div></div>
               <div className="ethics-item"><div className="ethics-number">02</div><div className="ethics-icon"><LockKeyhole size={21} /></div><div><h3>Privacy first</h3><p>Queries are classified locally in this prototype. We collect no personal data and save no item history.</p></div></div>
-              <div className="ethics-item"><div className="ethics-number">03</div><div className="ethics-icon"><UsersRound size={21} /></div><div><h3>Fair & accessible</h3><p>Plain language and four clear streams keep the experience useful across ages, contexts, and confidence levels.</p></div></div>
+              <div className="ethics-item"><div className="ethics-number">03</div><div className="ethics-icon"><UsersRound size={21} /></div><div><h3>Accessibility & inclusive design</h3><p>Plain language, visual chips, camera input, and zero-typing wizard paths keep the experience useful for non-technical users.</p></div></div>
             </div>
           </div>
         </section>

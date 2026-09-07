@@ -30,7 +30,7 @@ EcoSorted AI supports three complementary ways to begin a classification:
 
 1. **Direct text search:** Type an item description in the traditional search field and submit with the button or Enter key.
 2. **Image upload / camera recognition:** Drag and drop an image, upload from a device, or use a mobile camera input. The prototype performs filename-based visual hint recognition to demonstrate the multimodal flow and returns the same standard result card.
-3. **Quick-select chips and guided wizard:** Choose a visual chip for common tricky items, or open the two-question **Help me identify** wizard. The wizard asks whether an item is organic, packaging, or electronic/metal, then whether it is clean/dry, greasy/wet, or dangerous/battery-powered.
+3. **Quick-select chips and guided wizard:** Choose a visual chip for common tricky items — Greasy Pizza Box, Old Battery / Cell, Broken Phone / Charging Cable, Food Scraps / Organic, or Plastic Bottle — or open the two-question **Help Me Identify** wizard. The wizard asks whether an item is organic, plastic/paper, or electronic/metal, then whether it is clean/dry, wet/greasy, or dangerous/battery-powered.
 
 All three methods converge on the same category badge, confidence signal, two-step handling guide, safety guardrail, and local drop-off advice. This multi-tier design supports users who prefer typing, visual recognition, or no-typing interaction.
 
@@ -52,7 +52,7 @@ The product makes its design commitments visible through three principles:
 
 - **Safety & guardrails:** Hazardous items are surfaced clearly with specific precautions.
 - **Privacy first:** The static prototype performs classification in the browser and stores no personal query history.
-- **Fairness & accessibility:** Plain language, four clear streams, visible category colors, and concise instructions keep the tool approachable across ages and contexts.
+- **Accessibility & inclusive design:** Plain language, visual chips, camera input, and a zero-typing wizard path support non-technical users alongside four clear streams, visible category colors, and concise instructions.
 
 ### SDG impact dashboard
 
