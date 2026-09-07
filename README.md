@@ -24,6 +24,16 @@ By combining simple prompt logic, a local waste-rules knowledge library, and cle
 
 Describe an item in natural language, such as `old smartphone`, `greasy pizza box`, or `broken lithium battery`. The local classifier normalizes the query, matches it against a 25+ item rules library, assigns a category, and shows a confidence signal.
 
+### Three accessible input modes
+
+EcoSorted AI supports three complementary ways to begin a classification:
+
+1. **Direct text search:** Type an item description in the traditional search field and submit with the button or Enter key.
+2. **Image upload / camera recognition:** Drag and drop an image, upload from a device, or use a mobile camera input. The prototype performs filename-based visual hint recognition to demonstrate the multimodal flow and returns the same standard result card.
+3. **Quick-select chips and guided wizard:** Choose a visual chip for common tricky items, or open the two-question **Help me identify** wizard. The wizard asks whether an item is organic, packaging, or electronic/metal, then whether it is clean/dry, greasy/wet, or dangerous/battery-powered.
+
+All three methods converge on the same category badge, confidence signal, two-step handling guide, safety guardrail, and local drop-off advice. This multi-tier design supports users who prefer typing, visual recognition, or no-typing interaction.
+
 ### Two-step preparation guide
 
 Every result includes two practical preparation steps. Examples include rinsing containers, flattening cardboard, erasing data from devices, and taping battery terminals.

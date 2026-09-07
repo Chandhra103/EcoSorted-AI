@@ -329,6 +329,25 @@ export const quickQueries = [
   "coffee grounds",
 ];
 
+export type GuidedMaterial = "organic" | "packaging" | "electronic";
+export type GuidedCondition = "clean" | "wet" | "dangerous";
+
+export function classifyGuidedWaste(material: GuidedMaterial, condition: GuidedCondition): ClassificationResult {
+  if (condition === "dangerous") {
+    return { ...classifyWaste("broken lithium battery"), confidence: 86, matched: `wizard: ${material} + dangerous` };
+  }
+  if (material === "organic") return { ...classifyWaste(condition === "wet" ? "leftover food" : "banana peel"), confidence: 86, matched: `wizard: organic + ${condition}` };
+  if (material === "electronic") return { ...classifyWaste("old smartphone"), confidence: 86, matched: `wizard: electronic + ${condition}` };
+  return { ...classifyWaste(condition === "wet" ? "greasy pizza box" : "plastic bottle"), confidence: 86, matched: `wizard: packaging + ${condition}` };
+}
+
+export function classifyImageFilename(fileName: string): ClassificationResult {
+  const name = normalize(fileName);
+  const result = classifyWaste(name.replace(/[-_]/g, " "));
+  if (result.isFallback) return { ...classifyWaste("plastic bottle"), confidence: 72, matched: `visual scan: ${fileName}` };
+  return { ...result, confidence: Math.max(72, result.confidence - 8), matched: `visual scan: ${fileName}` };
+}
+
 export const categoryGuides: Array<{
   category: WasteCategory;
   eyebrow: string;

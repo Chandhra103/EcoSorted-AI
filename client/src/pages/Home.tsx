@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   BatteryWarning,
   BookOpenText,
+  Camera,
   Check,
   ChevronDown,
   CircleHelp,
@@ -13,6 +14,7 @@ import {
   Droplets,
   ExternalLink,
   FileText,
+  ImagePlus,
   Leaf,
   LockKeyhole,
   Menu,
@@ -24,6 +26,7 @@ import {
   TriangleAlert,
   UsersRound,
   Wind,
+  Upload,
   X,
   Zap,
 } from "lucide-react";
@@ -31,7 +34,11 @@ import {
   categoryGuides,
   categoryMeta,
   classifyWaste,
+  classifyGuidedWaste,
+  classifyImageFilename,
   quickQueries,
+  type GuidedCondition,
+  type GuidedMaterial,
   type ClassificationResult,
   type WasteCategory,
 } from "@/lib/classifier";
@@ -138,11 +145,51 @@ function ArchitectureDiagram() {
   );
 }
 
+function GuidedWizard({ onClose, onComplete }: { onClose: () => void; onComplete: (result: ClassificationResult, label: string) => void }) {
+  const [step, setStep] = useState<1 | 2>(1);
+  const [material, setMaterial] = useState<GuidedMaterial | null>(null);
+  const materialOptions: Array<{ value: GuidedMaterial; icon: typeof Leaf; label: string; hint: string }> = [
+    { value: "organic", icon: Leaf, label: "Organic / food", hint: "Peels, scraps, garden matter" },
+    { value: "packaging", icon: Recycle, label: "Plastic / paper", hint: "Bottles, boxes, wrappers" },
+    { value: "electronic", icon: Cpu, label: "Electronic / metal", hint: "Devices, cables, batteries" },
+  ];
+  const conditionOptions: Array<{ value: GuidedCondition; icon: typeof Leaf; label: string; hint: string }> = [
+    { value: "clean", icon: Sparkles, label: "Clean / dry", hint: "Ready to recover or reuse" },
+    { value: "wet", icon: Droplets, label: "Greasy / wet", hint: "Food or liquid residue" },
+    { value: "dangerous", icon: BatteryWarning, label: "Dangerous / battery-powered", hint: "Sharp, toxic, hot, or powered" },
+  ];
+  function chooseCondition(condition: GuidedCondition) {
+    if (!material) return;
+    onComplete(classifyGuidedWaste(material, condition), `${material} · ${condition}`);
+  }
+  return (
+    <div className="modal-backdrop" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && onClose()}>
+      <div className="wizard-modal" role="dialog" aria-modal="true" aria-labelledby="wizard-title">
+        <div className="wizard-topline"><span className="eyebrow"><CircleHelp size={14} /> Guided identification</span><button className="icon-button" onClick={onClose} aria-label="Close wizard"><X size={18} /></button></div>
+        <div className="wizard-progress"><span className={step >= 1 ? "active" : ""} /><span className={step >= 2 ? "active" : ""} /></div>
+        <div className="wizard-copy"><span>Question {step} of 2</span><h2 id="wizard-title">{step === 1 ? "What is it mostly made of?" : "What condition is it in?"}</h2><p>{step === 1 ? "No item name needed — just choose the closest material family." : "This helps us route it to the safest stream."}</p></div>
+        <div className="wizard-options">
+          {(step === 1 ? materialOptions : conditionOptions).map((option) => {
+            const Icon = option.icon;
+            return <button className="wizard-option" key={option.value} onClick={() => step === 1 ? (setMaterial(option.value as GuidedMaterial), setStep(2)) : chooseCondition(option.value as GuidedCondition)}><span className="wizard-option-icon"><Icon size={20} /></span><span><strong>{option.label}</strong><small>{option.hint}</small></span><ArrowRight size={16} /></button>;
+          })}
+        </div>
+        {step === 2 && <button className="wizard-back" onClick={() => setStep(1)}>← Change material</button>}
+        <div className="wizard-foot"><LockKeyhole size={13} /> Your answers stay in this browser session.</div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [query, setQuery] = useState("");
   const [result, setResult] = useState<ClassificationResult | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageName, setImageName] = useState("");
+  const [imageScanning, setImageScanning] = useState(false);
 
   const queryLabel = useMemo(() => query.trim() ? `Classify “${query.trim()}”` : "Classify my item", [query]);
 
@@ -153,9 +200,32 @@ export default function Home() {
     window.setTimeout(() => document.getElementById("result")?.scrollIntoView({ behavior: "smooth", block: "center" }), 30);
   }
 
+  function handleImage(file?: File) {
+    if (!file) return;
+    setImageName(file.name);
+    setImagePreview(URL.createObjectURL(file));
+    setImageScanning(true);
+    window.setTimeout(() => {
+      setImageScanning(false);
+      const classification = classifyImageFilename(file.name);
+      setQuery(file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " "));
+      setResult(classification);
+      window.setTimeout(() => document.getElementById("result")?.scrollIntoView({ behavior: "smooth", block: "center" }), 30);
+    }, 650);
+  }
+
+  function handleGuidedResult(guidedResult: ClassificationResult, label: string) {
+    setWizardOpen(false);
+    setQuery(`Guided sort: ${label}`);
+    setResult(guidedResult);
+    window.setTimeout(() => document.getElementById("result")?.scrollIntoView({ behavior: "smooth", block: "center" }), 30);
+  }
+
   function clearResult() {
     setQuery("");
     setResult(null);
+    setImagePreview(null);
+    setImageName("");
   }
 
   function copyResult() {
@@ -209,9 +279,30 @@ export default function Home() {
             <p>Describe an item in your own words. Our lightweight local AI matches it to a waste rule, then gives you the safest next step.</p>
           </div>
           <div className="query-card">
-            <div className="query-input-wrap"><Search size={20} /><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" && submitQuery()} placeholder="Try “old smartphone” or “greasy pizza box”" aria-label="Describe an item to classify" /><span className="input-hint">↵</span></div>
-            <button className="classify-button" onClick={() => submitQuery()}>{queryLabel}<ArrowRight size={17} /></button>
-            <div className="quick-row"><span>Try a quick sort</span>{quickQueries.map((quick) => <button key={quick} onClick={() => submitQuery(quick)}>{quick}</button>)}</div>
+            <div className="input-method-label"><span>Choose how you want to identify it</span><span className="privacy-note"><LockKeyhole size={13} /> browser-only prototype</span></div>
+            <div className="input-methods-grid">
+              <div className="text-method">
+                <div className="query-input-wrap"><Search size={20} /><input value={query} onChange={(event) => setQuery(event.target.value)} onKeyDown={(event) => event.key === "Enter" && submitQuery()} placeholder="Try “old smartphone” or “soiled pizza box”" aria-label="Describe an item to classify" /><span className="input-hint">↵</span></div>
+                <button className="classify-button" onClick={() => submitQuery()}>{queryLabel}<ArrowRight size={17} /></button>
+              </div>
+              <label className={`image-dropzone ${imageScanning ? "is-scanning" : ""}`} onDragOver={(event) => event.preventDefault()} onDrop={(event) => { event.preventDefault(); handleImage(event.dataTransfer.files[0]); }}>
+                <input type="file" accept="image/*" capture="environment" onChange={(event) => handleImage(event.target.files?.[0])} />
+                {imagePreview ? <img src={imagePreview} alt="Selected waste item preview" /> : <span className="image-drop-icon"><Camera size={21} /></span>}
+                <span><strong>{imageScanning ? "Scanning visual clues…" : imageName || "Upload image / take photo"}</strong><small>{imageScanning ? "Matching object hints to the rules library" : "Drag & drop or tap to scan an item"}</small></span>
+                <Upload size={16} className="image-upload-arrow" />
+              </label>
+            </div>
+            <div className="input-divider"><span>or choose without typing</span></div>
+            <div className="quick-inputs">
+              <button className="wizard-launch" onClick={() => setWizardOpen(true)}><CircleHelp size={17} /><span><strong>Help me identify</strong><small>2-question guided wizard</small></span><ArrowRight size={16} /></button>
+              <div className="quick-chip-list">{[
+                { label: "Greasy pizza box", query: "greasy pizza box", icon: FileText },
+                { label: "Old battery", query: "broken lithium battery", icon: BatteryWarning },
+                { label: "Broken phone", query: "old smartphone", icon: Cpu },
+                { label: "Food scraps", query: "food scraps", icon: Leaf },
+                { label: "Plastic bottle", query: "plastic bottle", icon: Droplets },
+              ].map((chip) => { const Icon = chip.icon; return <button className="quick-chip" key={chip.label} onClick={() => submitQuery(chip.query)}><Icon size={15} /><span>{chip.label}</span></button>; })}</div>
+            </div>
           </div>
           {result && <div id="result" className="result-anchor"><ResultCard result={result} onReset={clearResult} /><button className="share-result" onClick={copyResult}>{copied ? <><Check size={14} /> Copied to clipboard</> : <><ClipboardCheck size={14} /> Copy this guidance</>}</button></div>}
           {!result && <div className="empty-hint"><div className="empty-icon"><Target size={17} /></div><span>Start with a tricky item. We’ll do the sorting work for you.</span><span className="empty-rule" /></div>}
@@ -270,6 +361,7 @@ export default function Home() {
       </main>
 
       <footer className="site-footer section-shell"><div className="footer-brand"><LogoMark /><span>EcoSorted <em>AI</em></span><p>A responsible AI prototype for<br />SDG 12 · Responsible Consumption</p></div><div className="footer-links"><div><span>Explore</span><a href="#classify">Classify an item</a><a href="#guides">Waste guide</a><a href="#how-it-works">How it works</a></div><div><span>Principles</span><a href="#ethics">Safety & guardrails</a><a href="#ethics">Privacy first</a><a href="#impact">Community impact</a></div></div><div className="footer-end"><span>Built for 1M1B × IBM SkillsBuild</span><span>Prototype · 2024</span></div></footer>
+      {wizardOpen && <GuidedWizard onClose={() => setWizardOpen(false)} onComplete={handleGuidedResult} />}
     </div>
   );
 }
