@@ -2,7 +2,7 @@
 
 ## Slide 1 — EcoSorted AI
 **Title:** EcoSorted AI: Smart Waste Segregation & Recycling Assistant  
-**Subtitle:** A responsible AI prototype for everyday waste decisions  
+**Subtitle:** A responsible AI prototype for everyday waste decisions 
 **Presenter:** Student Name · Institution  
 **Program:** 1M1B — IBM SkillsBuild AI + Sustainability Virtual Internship  
 **Visual direction:** Product hero screenshot with the four stream colors.
